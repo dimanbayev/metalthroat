@@ -46,9 +46,22 @@ Text Input → [T5 Text Encoder (FROZEN)] → [Transformer LM (FINE-TUNED)] → 
 ## Key Paths
 
 - `dataset/raw/` - Downloaded YouTube audio
-- `dataset/processed/` - Segmented 10s WAV clips at 32kHz
+- `dataset/processed/` - Segmented 10s WAV clips at 32kHz (3,546 train / 393 val)
 - `dataset/train.jsonl`, `dataset/val.jsonl` - Training manifests
-- `checkpoints/best_checkpoint.pt` - Trained model weights
+- `checkpoints/best_checkpoint.pt` - Best fine-tuned LM weights
+- `checkpoints/training_curves.png` - Loss curves across all epochs
+- `evaluation/` - Base vs fine-tuned comparison WAVs + spectrograms (after NB4)
+- `samples/` - Showcase throat singing WAVs at best quality (after generate_samples.py)
+
+## Utility Scripts
+
+- `recover_state.py` — Reads all epoch checkpoints, finds best, saves `best_checkpoint.pt`, regenerates `training_curves.png`. Run after any interrupted training session.
+- `continue_training.py` — Resumes training from the latest epoch checkpoint, trains to epoch 30.
+- `generate_samples.py` — Grid search over inference params, picks best candidates, saves showcase WAVs to `samples/`.
+
+## Training State
+
+See `PROGRESS.md` for current epoch, loss history, and next steps.
 
 ## Training Configuration (Notebook 3)
 
@@ -57,10 +70,13 @@ Text Input → [T5 Text Encoder (FROZEN)] → [Transformer LM (FINE-TUNED)] → 
 - Optimizer: AdamW (betas=0.9/0.95, weight_decay=0.01)
 - Scheduler: CosineAnnealingLR over 30 epochs
 - Early stopping patience: 10 epochs
-- Mixed precision: bfloat16
+- Precision: float32 (autocast DISABLED — audiocraft 1.3.0 has dtype bugs that cause NaN with bfloat16)
 
 ## Troubleshooting
 
+- **NaN loss during training**: Two separate causes:
+  1. Do NOT use `torch.autocast` — audiocraft 1.3.0 has mixed-precision bugs. Use float32 throughout (`model.lm = model.lm.float()`, no autocast block).
+  2. MusicGen's codebook delay pattern produces NaN logits for the first K positions of codebook K. These are correctly masked by `lm_output.mask`, BUT `NaN * 0 = NaN` in IEEE 754. Fix: call `logits.nan_to_num(nan=0.0)` before `F.cross_entropy`.
 - **GPU OOM**: Reduce batch size in NB3
 - **Poor results**: Check data quality in NB2, increase dataset size
 - **Catastrophic forgetting**: Lower learning rate
