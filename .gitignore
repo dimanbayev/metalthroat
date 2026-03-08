@@ -1,0 +1,15 @@
+__pycache__/
+.ipynb_checkpoints/
+venv/
+env/
+.env
+.vscode/
+nb1_outputs/
+dataset/raw/
+dataset/processed/
+checkpoints/*.pt
+*.pt
+*.pth
+*.ckpt
+*.log
+.DS_Store

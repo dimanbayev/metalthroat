@@ -1,0 +1,9 @@
+{
+  "data_dir": "D:\\Work\\MetalThroat\\dataset\\processed",
+  "train_manifest": "D:\\Work\\MetalThroat\\dataset\\train.jsonl",
+  "val_manifest": "D:\\Work\\MetalThroat\\dataset\\val.jsonl",
+  "sample_rate": 32000,
+  "clip_duration": 10.0,
+  "n_train": 3546,
+  "n_val": 393
+}

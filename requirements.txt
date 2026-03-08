@@ -1,0 +1,38 @@
+# ============================================================
+# MusicGen Throat Singing Fine-Tuning — Requirements
+# ============================================================
+# Python 3.10+ recommended
+#
+# ⚠️  RTX 5090 (Blackwell) USERS:
+#     You need PyTorch 2.7+ with CUDA 12.8
+#     Install PyTorch FIRST with:
+#       pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+#     THEN install the rest:
+#       pip install -r requirements.txt
+#
+# For older GPUs (CUDA 12.1):
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+#   pip install -r requirements.txt
+# ============================================================
+
+# Core — Music Generation
+audiocraft>=1.3.0
+
+# Audio Processing
+librosa>=0.10.0
+soundfile>=0.12.1
+pydub>=0.25.1
+torchaudio>=2.7.0        # Match your PyTorch version
+
+# Data Collection
+yt-dlp>=2024.11.0        # YouTube audio downloader
+
+# Visualization & Notebooks
+matplotlib>=3.7.0
+ipython>=8.0.0
+jupyter>=1.0.0
+ipywidgets>=8.0.0
+
+# Training Utilities
+tqdm>=4.65.0
+numpy>=1.24.0
