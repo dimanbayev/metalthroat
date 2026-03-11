@@ -8,8 +8,18 @@ nb1_outputs/
 dataset/raw/
 dataset/processed/
 checkpoints/*.pt
+checkpoints_lora/*.pt
 *.pt
 *.pth
 *.ckpt
 *.log
 .DS_Store
+
+# Personal / presentation files
+NOTION_PAGE.md
+TALKING_POINTS.md
+generate_showcase_viz.py
+showcase/
+
+# Claude local config
+.claude/settings.local.json
