@@ -20,9 +20,11 @@ Click any link to open GitHub's audio player. Three styles, three models — bas
 
 | Style | Base | v1 Full FT | v2 LoRA |
 |---|---|---|---|
-| Khoomei | [▶ base](evaluation_lora/base_khoomei.wav) | [▶ v1](evaluation_lora/v1_khoomei.wav) | [▶ lora](evaluation_lora/lora_khoomei.wav) |
-| Kargyraa | [▶ base](evaluation_lora/base_kargyraa.wav) | [▶ v1](evaluation_lora/v1_kargyraa.wav) | [▶ lora](evaluation_lora/lora_kargyraa.wav) |
-| Sygyt | [▶ base](evaluation_lora/base_sygyt.wav) | [▶ v1](evaluation_lora/v1_sygyt.wav) | [▶ lora](evaluation_lora/lora_sygyt.wav) |
+| Kargyraa ✓ | [▶ base](evaluation_lora/base_kargyraa.wav) | [▶ v1](evaluation_lora/v1_kargyraa.wav) | [▶ lora](evaluation_lora/lora_kargyraa.wav) |
+| Sygyt ✓ | [▶ base](evaluation_lora/base_sygyt.wav) | [▶ v1](evaluation_lora/v1_sygyt.wav) | [▶ lora](evaluation_lora/lora_sygyt.wav) |
+| Khoomei ✗ | [▶ base](evaluation_lora/base_khoomei.wav) | [▶ v1](evaluation_lora/v1_khoomei.wav) | [▶ lora](evaluation_lora/lora_khoomei.wav) |
+
+Khoomei is the weak result — scrapy high-frequency texture then silence. Kargyraa and sygyt each have one acoustic component to learn (a low drone; a high overtone melody). Khoomei requires both simultaneously, from noisier training data ("khoomei" is the umbrella term non-specialists use for all throat singing, so the YouTube labels are a grab-bag). The LoRA adapters learned the overtone register but dropped the drone anchor. See [Conclusions](#conclusions) for the full breakdown.
 
 ---
 
@@ -43,22 +45,6 @@ Harmonic ratio (fraction of audio energy that is tonal; higher = better):
 | **v2 LoRA** | **0.951** | **0.837** | **0.874** |
 
 LoRA achieved 4× less overfitting than full fine-tuning, a 9× smaller checkpoint, and better harmonic quality across all three styles.
-
----
-
-## Samples
-
-Click any file to open GitHub's audio player.
-
-**Best outputs (15s each)**
-
-| Style | Base MusicGen | v1 Full Fine-tune | v2 LoRA |
-|---|---|---|---|
-| Khoomei | [▶ base](evaluation_lora/base_khoomei.wav) | [▶ v1](evaluation_lora/v1_khoomei.wav) | [▶ lora](evaluation_lora/lora_khoomei.wav) |
-| Kargyraa | [▶ base](evaluation_lora/base_kargyraa.wav) | [▶ v1](evaluation_lora/v1_kargyraa.wav) | [▶ lora](evaluation_lora/lora_kargyraa.wav) |
-| Sygyt | [▶ base](evaluation_lora/base_sygyt.wav) | [▶ v1](evaluation_lora/v1_sygyt.wav) | [▶ lora](evaluation_lora/lora_sygyt.wav) |
-
-**[▶ 30-second showcase](samples_lora/showcase_30s.wav)** — best style, best inference params
 
 ---
 
@@ -154,7 +140,6 @@ python generate_showcase_viz.py
 ├── 05_train_lora.py
 ├── 05_lora_evaluation.ipynb
 ├── 06_generate_samples_lora.py
-├── generate_showcase_viz.py       # generates showcase/ PNGs
 ├── lora_utils.py                  # LoRALinear, inject_lora, checkpoint utils
 ├── recover_state.py               # rebuild best_checkpoint.pt from epoch files
 ├── continue_training.py           # resume v1 training from latest checkpoint
@@ -182,6 +167,24 @@ python generate_showcase_viz.py
 | Early stopping patience | 10 | 15 |
 | Augmentation | None | Pitch shift ±2 semitones (30%) |
 | Precision | float32 | float32 |
+
+---
+
+## Conclusions
+
+### Kargyraa and sygyt both worked
+
+The spectrograms show clear horizontal harmonic bands that track the base model's structure, and the harmonic ratios confirm it — LoRA recovered most of what full fine-tuning lost, without the garbled quality of v1.
+
+### Khoomei didn't
+
+… and the spectrogram tells you exactly why. The bottom-left panel shows bright energy clustered in the 2–4 kHz overtone register for a few seconds, then the whole thing goes dark. Scrapy violin texture, then silence. The spectral centroid came out at 4,653 Hz — ten times higher than the base model — meaning the model found the overtone register but dropped the low-frequency drone that makes those overtones sound like a voice rather than a string instrument.
+
+A few things compounded this. "Khoomei" is the umbrella term non-specialists use for all Mongolian throat singing, so YouTube data labeled khoomei is a grab-bag — demos, teaching videos, mixed styles, bad recordings. The model learned a noisier target than it did for the other two styles. And acoustically, khoomei is harder: kargyraa is one thing (a low drone), sygyt is one thing (an overtone melody), but khoomei requires both simultaneously — a stable fundamental in the 100–300 Hz range while a moving melody runs in the 1–3 kHz range. The LoRA adapters learned the top half of that but lost the bottom. Once the drone dropped out, the autoregressive context went incoherent, and the model collapsed to silence tokens — the low-entropy exit when the distribution goes flat.
+
+### Next step
+
+Clean the khoomei labels more aggressively, and run a rank ablation to see where the two-component structure actually becomes expressible.
 
 ---
 
