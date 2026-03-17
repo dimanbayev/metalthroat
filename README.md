@@ -24,8 +24,6 @@ Click any link to open GitHub's audio player. Three styles, three models — bas
 | Kargyraa | [▶ base](evaluation_lora/base_kargyraa.wav) | [▶ v1](evaluation_lora/v1_kargyraa.wav) | [▶ lora](evaluation_lora/lora_kargyraa.wav) |
 | Sygyt | [▶ base](evaluation_lora/base_sygyt.wav) | [▶ v1](evaluation_lora/v1_sygyt.wav) | [▶ lora](evaluation_lora/lora_sygyt.wav) |
 
-**[▶ 30-second showcase](samples_lora/showcase_30s.wav)** — best style, best inference params
-
 ---
 
 ## Results
